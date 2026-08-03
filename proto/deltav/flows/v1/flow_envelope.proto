@@ -1,0 +1,167 @@
+// Copyright (C) 2026 The Delta-V Authors
+// SPDX-License-Identifier: Apache-2.0
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package deltav.flows.v1;
+
+option java_multiple_files = true;
+option java_package = "org.deltav.flows.v1.proto";
+option go_package = "github.com/Riptide-Labs/deltav-proto-contracts/gen/go/deltav/flows/v1;flowsv1";
+
+// Classification of a received UDP datagram.
+//
+// This is a stateless HINT derived from a bounded prefix of the payload (the
+// first 8 bytes at most) plus the listener it arrived on. It is not a
+// guarantee that the payload parses. A consumer that trusts it without
+// validating will mis-dispatch malformed traffic.
+//
+// Tag numbers 0-9 match the udpramp DatagramClass enum value for value. The
+// value names differ (buf's DEFAULT ruleset requires the _UNSPECIFIED suffix
+// on the zero value), but names are not serialized, so the two are
+// interchangeable on the wire.
+enum DatagramClass {
+  DATAGRAM_CLASS_UNSPECIFIED = 0;
+  DATAGRAM_CLASS_NETFLOW_V5 = 1;
+  DATAGRAM_CLASS_NETFLOW_V9 = 2;
+  DATAGRAM_CLASS_IPFIX = 3;
+  DATAGRAM_CLASS_SFLOW = 4;
+  DATAGRAM_CLASS_SYSLOG_BSD = 5;
+  DATAGRAM_CLASS_SYSLOG_IETF = 6;
+  DATAGRAM_CLASS_SNMP_V1 = 7;
+  DATAGRAM_CLASS_SNMP_V2C = 8;
+  DATAGRAM_CLASS_SNMP_V3 = 9;
+}
+
+// A single received UDP datagram, forwarded verbatim and unparsed.
+//
+// This is the handover contract between a capture tier (udpramp) and a
+// stateful parsing consumer. The capture tier never parses templates or
+// flowsets; template state, enrichment and vendor quirks belong downstream
+// where there is CPU to spare. That split is what makes the capture tier safe
+// behind blind anycast or L4 distribution, where splitting templates from
+// data breaks a stateful collector.
+//
+// FIELD NUMBERS 1-10 ARE FROZEN and match udpramp's envelope.proto tag for
+// tag. Never renumber or reuse them; deprecate with `reserved` instead. Enum
+// extension is append-only. Protobuf matches fields by tag rather than by
+// message or package name, so tag stability is the entire compatibility
+// contract between this schema and udpramp's.
+message FlowEnvelope {
+  // Receive timestamp at the capture tier, nanoseconds since the Unix epoch.
+  uint64 received_at_unix_nanos = 1;
+
+  // Exporter (router) source address: 4 bytes for IPv4, 16 for IPv6.
+  // Raw bytes in network order, not a formatted string.
+  bytes exporter_ip = 2;
+
+  // Exporter UDP source port.
+  //
+  // Required downstream, not decorative: IPFIX-over-UDP template sessions are
+  // scoped per (exporter IP, source port), and UDP has no session teardown, so
+  // an exporter that restarts on a new port may reuse template IDs with
+  // different definitions. A consumer whose template cache key omits this will
+  // decode against stale templates and emit plausible garbage.
+  uint32 exporter_port = 3;
+
+  // Capture-tier listen address the datagram arrived on. Parser dispatch may
+  // be configured per listen port.
+  bytes listen_ip = 4;
+
+  // Capture-tier listen port.
+  uint32 listen_port = 5;
+
+  // The received UDP payload, verbatim and unparsed.
+  bytes payload = 6;
+
+  // Identity of the capture-tier instance that received this datagram.
+  string ramp_instance_id = 7;
+
+  // Monotonic per (ramp_instance_id, pipeline_id).
+  //
+  // Together with fields 7 and 9 this attributes loss introduced between the
+  // capture tier and the broker, which is distinct from exporter-side loss
+  // visible in flow header sequence numbers.
+  //
+  // NOTE: gaps in this field are NOT observable from a single Kafka partition.
+  // It advances per pipeline, but the partition key is the exporter, and one
+  // pipeline serves many exporters, so a partition sees an interleaved
+  // subsequence whose gaps are normal. Use ramp_exporter_sequence (11) for
+  // partition-local gap detection.
+  uint64 ramp_sequence = 8;
+
+  // Capture-tier pipeline that received this datagram. Pipelines are
+  // independent reader-to-egress paths; the kernel shards exporters across
+  // them, preserving per-exporter order without cross-thread coordination.
+  uint32 pipeline_id = 9;
+
+  // Stateless classification hint. See DatagramClass.
+  DatagramClass datagram_class = 10;
+
+  // Monotonic per (ramp_instance_id, pipeline_id, exporter_ip).
+  //
+  // Exists so loss detection is partition-local. Because the Kafka partition
+  // key is the exporter, every datagram in a partition that shares an exporter
+  // also shares this counter, so a gap here is a real gap. Detecting loss from
+  // ramp_sequence (8) alone would require reassembling a pipeline's full
+  // sequence across every partition.
+  uint64 ramp_exporter_sequence = 11;
+
+  // Tenancy attribution. STAMPED BY THE GATEWAY, never by the capture tier.
+  //
+  // Any value present on ingress is an untrusted claim. The gateway overrides
+  // it by appending its own encoding of this field to the received bytes:
+  // parsing a concatenation of two encoded messages is equivalent to parsing
+  // them separately and merging, so the gateway needs no decode step.
+  //
+  // The override only holds if the gateway writes EVERY Tenancy field on every
+  // message. Singular submessages merge recursively rather than being
+  // replaced, and a proto3 string set to "" is indistinguishable from unset
+  // and is not written to the wire, so an omitted field would let a producer's
+  // claimed value survive the merge. Tenancy's fields are `optional` for
+  // exactly this reason.
+  Tenancy tenancy = 12;
+
+  // Gateway receive timestamp, nanoseconds since the Unix epoch.
+  //
+  // Subtracting received_at_unix_nanos (1) gives the capture-to-gateway leg,
+  // so latency and loss can be attributed to the gateway hop separately.
+  uint64 gateway_received_at_unix_nanos = 13;
+
+  // Held for further gateway-stamped provenance.
+  reserved 14 to 19;
+}
+
+// Tenant attribution for a datagram.
+//
+// EVERY FIELD IS `optional` DELIBERATELY, and it is a security requirement
+// rather than a style choice. See FlowEnvelope.tenancy.
+//
+// `zone` and `system` correspond to the delta-v `location` and `system_id`
+// respectively, so a Minion-compatible gateway can populate this from the
+// identity metadata headers it already receives.
+message Tenancy {
+  // Tenant identifier.
+  optional string tenant = 1;
+
+  // Organisation within the tenant.
+  optional string organisation = 2;
+
+  // Monitoring zone or location the exporter belongs to.
+  optional string zone = 3;
+
+  // Identity of the collecting system.
+  optional string system = 4;
+}
