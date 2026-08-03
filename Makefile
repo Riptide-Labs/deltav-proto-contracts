@@ -12,7 +12,9 @@ CARGOFLAGS ?= --locked
 
 # Reference the schemas are checked against for backwards compatibility. Resolved
 # from the local clone so the check needs no network access or repo credentials.
-BUF_AGAINST ?= .git#ref=origin/main
+# The '#' must stay escaped: unescaped it starts a make comment, which silently
+# truncates this to '.git' and makes buf compare HEAD against itself.
+BUF_AGAINST ?= .git\#ref=origin/main
 
 .PHONY: help
 help: ## List available targets
