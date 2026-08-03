@@ -25,7 +25,13 @@ option go_package = "github.com/pbrane/deltav-proto-contracts/gen/go/deltav/tele
 // Cloud-Native gRPC Ingestion Service for telemetry metric streaming
 service TelemetryIngestionService {
   // Client-streaming endpoint for pushing telemetry metric batches over HTTP/2
-  rpc ExportMetrics (stream TelemetryMetricBatch) returns (ExportMetricsResponse);
+  rpc ExportMetrics (stream ExportMetricsRequest) returns (ExportMetricsResponse);
+}
+
+// Request message carrying a single telemetry metric batch in the export stream
+message ExportMetricsRequest {
+  // The batch of metric points to ingest
+  TelemetryMetricBatch batch = 1;
 }
 
 // Response message for telemetry metric batch export
