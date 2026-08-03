@@ -25,8 +25,8 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <protobuf.version>3.25.5</protobuf.version>
-        <grpc.version>1.62.2</grpc.version>
+        <protobuf.version>4.35.1</protobuf.version>
+        <grpc.version>1.83.0</grpc.version>
     </properties>
 
     <dependencies>
@@ -70,7 +70,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
