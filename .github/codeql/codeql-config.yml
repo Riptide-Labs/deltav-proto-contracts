@@ -8,4 +8,6 @@ queries:
 paths-ignore:
   # Protobuf and gRPC stubs, regenerated on every build. Findings here are not
   # actionable: the fix would be upstream in protoc or grpc-java, not in this repo.
-  - target/generated-sources
+  - 'target/generated-sources/**'
+  - '**/generated-sources/**'
+  - 'gen/**'
