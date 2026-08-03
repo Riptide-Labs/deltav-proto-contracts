@@ -7,9 +7,9 @@ description = "Canonical Apache 2.0 licensed Protobuf schemas and gRPC contracts
 repository = "https://github.com/Riptide-Labs/deltav-proto-contracts"
 
 [dependencies]
-prost = "0.13"
-tonic = "0.12"
+prost = "0.14"
+tonic = "0.14"
 tokio = { version = "1", features = ["full"] }
 
 [build-dependencies]
-tonic-build = "0.12"
+tonic-build = "0.14"
