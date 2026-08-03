@@ -35,10 +35,14 @@ updates:
     commit-message:
       prefix: build
     groups:
+      # prost, tonic and tonic-build must move together: a 0.x bump is a major
+      # under semver, so excluding majors here files them as separate PRs that
+      # each fail to build on their own.
       rust:
         patterns:
           - '*'
         update-types:
+          - major
           - minor
           - patch
 
@@ -54,9 +58,13 @@ updates:
     commit-message:
       prefix: build
     groups:
+      # protobuf-java and grpc-java must move together. protobuf.version also
+      # selects protoc, so bumping it alone regenerates the stubs against a
+      # runtime that grpc-java's own pin does not support.
       java:
         patterns:
           - '*'
         update-types:
+          - major
           - minor
           - patch
