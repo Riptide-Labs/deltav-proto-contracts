@@ -52,7 +52,7 @@ build-rust: ## Build the Rust crate
 	$(CARGO) build $(CARGOFLAGS) --all-targets
 
 .PHONY: package
-package: ## Build the release artifacts (JAR + sources + javadoc)
+package: ## Build the release artifacts (JAR + sources JAR)
 	$(MVN) $(MVNFLAGS) clean package
 
 .PHONY: test

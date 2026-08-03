@@ -4,7 +4,7 @@ version = "1.0.0"
 edition = "2021"
 license = "Apache-2.0"
 description = "Canonical Apache 2.0 licensed Protobuf schemas and gRPC contracts for OpenNMS Delta-V multi-protocol telemetry."
-repository = "https://github.com/pbrane/deltav-proto-contracts"
+repository = "https://github.com/Riptide-Labs/deltav-proto-contracts"
 
 [dependencies]
 prost = "0.13"
