@@ -1,0 +1,273 @@
+// Copyright (C) 2026 The Delta-V Authors
+// SPDX-License-Identifier: Apache-2.0
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package deltav.flows.v1;
+
+import "deltav/flows/v1/flow_envelope.proto";
+
+option java_multiple_files = true;
+option java_package = "org.deltav.flows.v1.proto";
+option go_package = "github.com/Riptide-Labs/deltav-proto-contracts/gen/go/deltav/flows/v1;flowsv1";
+
+// Export protocol a flow record was decoded from.
+enum FlowProtocol {
+  FLOW_PROTOCOL_UNSPECIFIED = 0;
+  FLOW_PROTOCOL_NETFLOW_V5 = 1;
+  FLOW_PROTOCOL_NETFLOW_V9 = 2;
+  FLOW_PROTOCOL_IPFIX = 3;
+  FLOW_PROTOCOL_SFLOW = 4;
+}
+
+// Direction of the flow relative to the observing interface.
+enum FlowDirection {
+  FLOW_DIRECTION_UNSPECIFIED = 0;
+  FLOW_DIRECTION_INGRESS = 1;
+  FLOW_DIRECTION_EGRESS = 2;
+}
+
+// Sampling algorithm in use at the exporter.
+//
+// Values follow the IPFIX samplingAlgorithm assignments, so the numbers are
+// the specification's rather than this schema's and must not be reassigned.
+enum SamplingAlgorithm {
+  SAMPLING_ALGORITHM_UNSPECIFIED = 0;
+  SAMPLING_ALGORITHM_SYSTEMATIC_COUNT_BASED = 1;
+  SAMPLING_ALGORITHM_SYSTEMATIC_TIME_BASED = 2;
+  SAMPLING_ALGORITHM_RANDOM_N_OUT_OF_N = 3;
+  SAMPLING_ALGORITHM_UNIFORM_PROBABILISTIC = 4;
+  SAMPLING_ALGORITHM_PROPERTY_MATCH_FILTERING = 5;
+  SAMPLING_ALGORITHM_HASH_BASED_FILTERING = 6;
+  SAMPLING_ALGORITHM_FLOW_STATE_DEPENDENT = 7;
+}
+
+// A single decoded flow record, normalised across export protocols.
+//
+// This is the contract for consumers that want parsed flows rather than raw
+// datagrams. It sits downstream of a stateful parser, so anything published
+// here has already survived template resolution.
+//
+// EVERY SCALAR IS `optional` DELIBERATELY. Absent and zero are different
+// facts in flow data: ip_tos = 0 is a valid DSCP and ECN combination, while an
+// exporter that never reported it is not the same observation. Without
+// explicit presence, proto3 collapses the two and a consumer cannot tell them
+// apart, which silently corrupts anything that aggregates on those fields.
+//
+// KNOWN GAP: sFlow does not fit this message. sFlow samples carry raw packet
+// headers, a sample pool, a drop count and extended switch/router/gateway
+// records that have no equivalent here. Publishing sFlow through this schema
+// today would lose them. Modelling that is deliberately deferred rather than
+// approximated, because an approximation would be indistinguishable from real
+// data downstream.
+message NormalisedFlow {
+  // Time the datagram carrying this record was received.
+  optional uint64 received_at_unix_nanos = 1;
+
+  // Record timestamp after clock correction.
+  optional uint64 timestamp_unix_nanos = 2;
+
+  // Export protocol this record was decoded from.
+  FlowProtocol flow_protocol = 3;
+
+  // Number of flow records carried by the datagram this record came from.
+  optional uint32 flow_records = 4;
+
+  // Sequence number from the export packet header.
+  //
+  // The unit differs by protocol and the difference matters for loss
+  // accounting: IPFIX and NetFlow v5 count Data Records, so a packet carrying
+  // N records advances the counter by N, while NetFlow v9 counts export
+  // packets and sFlow counts datagrams, so both advance by 1.
+  optional uint64 flow_seq_num = 5;
+
+  // Device that exported this record.
+  ExporterIdentity exporter = 6;
+
+  // Tenant attribution, carried through from the envelope.
+  Tenancy tenancy = 7;
+
+  // Time the first packet of this flow was observed.
+  optional uint64 first_switched_unix_nanos = 10;
+
+  // Time the last packet of this flow was observed.
+  optional uint64 last_switched_unix_nanos = 11;
+
+  // Start of the interval this record's counters cover. Defaults to
+  // first_switched for protocols without a delta concept.
+  optional uint64 delta_switched_unix_nanos = 12;
+
+  // SNMP ifIndex of the ingress interface.
+  optional uint32 input_snmp = 20;
+
+  // SNMP ifIndex of the egress interface.
+  optional uint32 output_snmp = 21;
+
+  // Source autonomous system number.
+  optional uint64 src_as = 30;
+
+  // Source address: 4 bytes for IPv4, 16 for IPv6, network order.
+  optional bytes src_addr = 31;
+
+  // Source prefix length in bits.
+  optional uint32 src_mask_len = 32;
+
+  // Source transport port.
+  optional uint32 src_port = 33;
+
+  // Destination autonomous system number.
+  optional uint64 dst_as = 34;
+
+  // Destination address: 4 bytes for IPv4, 16 for IPv6, network order.
+  optional bytes dst_addr = 35;
+
+  // Destination prefix length in bits.
+  optional uint32 dst_mask_len = 36;
+
+  // Destination transport port.
+  optional uint32 dst_port = 37;
+
+  // Next-hop address, network order.
+  optional bytes next_hop = 38;
+
+  // Octets observed in this flow.
+  optional uint64 octets = 40;
+
+  // Packets observed in this flow.
+  optional uint64 packets = 41;
+
+  // Direction relative to the observing interface.
+  FlowDirection direction = 50;
+
+  // NetFlow v5 engine identifier.
+  optional uint32 engine_id = 51;
+
+  // NetFlow v5 engine type.
+  optional uint32 engine_type = 52;
+
+  // VLAN identifier.
+  optional uint32 vlan = 53;
+
+  // IP version, 4 or 6.
+  optional uint32 ip_protocol_version = 54;
+
+  // IP protocol number.
+  optional uint32 protocol = 55;
+
+  // TCP flags, union across the flow.
+  optional uint32 tcp_flags = 56;
+
+  // IP type of service. DSCP is the top 6 bits, ECN the bottom 2.
+  optional uint32 ip_tos = 57;
+
+  // Sampling algorithm reported by the exporter.
+  SamplingAlgorithm sampling_algorithm = 60;
+
+  // Sampling interval: one packet sampled per this many observed.
+  optional double sampling_interval = 61;
+
+  // Information Elements decoded from the record but not promoted to a field
+  // above. Lets vendor and enterprise elements survive without a schema change
+  // per vendor.
+  //
+  // Tags at and above 1000 are reserved for Information Elements later
+  // promoted to first-class fields, following the convention established by
+  // goflow2's custom mapping. Promoting an element is additive: consumers that
+  // do not know the new tag keep reading it from this list.
+  repeated InformationElement extended = 900;
+}
+
+// Identity of the device that exported a flow record.
+//
+// A oneof rather than a flat pair of fields, because the two protocol families
+// identify an exporter differently and conflating them produces wrong node
+// correlation. NetFlow and IPFIX scope an exporter by UDP source address plus
+// observation domain, so one address can host several independent export
+// streams. sFlow identifies an agent by an address carried INSIDE the payload
+// plus a sub-agent ID, which may legitimately differ from the UDP source.
+message ExporterIdentity {
+  // Which identification scheme applies.
+  oneof kind {
+    // NetFlow v5/v9 and IPFIX.
+    NetflowIpfixIdentity netflow_ipfix = 1;
+
+    // sFlow v5.
+    SflowIdentity sflow = 2;
+  }
+}
+
+// NetFlow and IPFIX exporter identity.
+message NetflowIpfixIdentity {
+  // UDP source address of the exporter, network order.
+  bytes source = 1;
+
+  // Observation domain, called Source ID in NetFlow v9. Zero when the protocol
+  // has no such concept, as in NetFlow v5.
+  uint64 observation_domain = 2;
+}
+
+// sFlow agent identity.
+message SflowIdentity {
+  // Agent address carried in the datagram, network order. May differ from the
+  // UDP source address.
+  bytes agent_address = 1;
+
+  // Sub-agent identifier.
+  uint64 sub_agent_id = 2;
+}
+
+// One decoded Information Element that has no promoted field.
+//
+// Keyed by the (enterprise_number, element_id) tuple, which is what makes an
+// element globally unambiguous: enterprises may define elements without
+// registering them with IANA, so the element ID alone is not sufficient
+// outside the defining enterprise.
+//
+// The value types follow the IPFIX information model's abstract data types.
+// Types narrower than 32 bits widen to the 64-bit variants rather than gaining
+// their own cases, because protobuf varints already encode small values
+// compactly and extra cases would only add decode branches.
+message InformationElement {
+  // IANA Private Enterprise Number, or 0 for an IANA-registered element.
+  uint32 enterprise_number = 1;
+
+  // Information Element identifier within the enterprise.
+  uint32 element_id = 2;
+
+  // The decoded value, in whichever abstract type the element declares.
+  oneof value {
+    // unsigned8, unsigned16, unsigned32, unsigned64.
+    uint64 unsigned_value = 3;
+
+    // signed8, signed16, signed32, signed64.
+    int64 signed_value = 4;
+
+    // float32, float64.
+    double float_value = 5;
+
+    // boolean.
+    bool boolean_value = 6;
+
+    // octetArray, macAddress, ipv4Address, ipv6Address.
+    bytes octet_value = 7;
+
+    // string.
+    string string_value = 8;
+
+    // dateTimeSeconds, dateTimeMilliseconds, dateTimeMicroseconds,
+    // dateTimeNanoseconds, all normalised to nanoseconds since the Unix epoch.
+    uint64 datetime_unix_nanos = 9;
+  }
+}

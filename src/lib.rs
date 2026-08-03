@@ -18,3 +18,9 @@ pub mod alarms {
         tonic::include_proto!("deltav.alarms.v1");
     }
 }
+
+pub mod flows {
+    pub mod v1 {
+        tonic::include_proto!("deltav.flows.v1");
+    }
+}
