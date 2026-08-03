@@ -1,0 +1,92 @@
+// Copyright (C) 2026 The Delta-V Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package deltav.telemetry.v1;
+
+option java_multiple_files = true;
+option java_package = "org.deltav.telemetry.v1.proto";
+option go_package = "github.com/pbrane/deltav-proto-contracts/gen/go/deltav/telemetry/v1;telemetryv1";
+
+// Envelope carrying a batch of normalized telemetry metrics
+message TelemetryMetricBatch {
+  // ID of the ingestion collector daemon emitting this batch (e.g. "gnmi-collector-rust", "daemon-boot-collectd")
+  string collector_id = 1;
+
+  // Epoch timestamp in milliseconds when the collection occurred
+  int64 collection_timestamp_ms = 2;
+
+  // List of normalized telemetry metric points
+  repeated TelemetryMetric metrics = 3;
+}
+
+// Single normalized metric point adhering to Prometheus dimensional vector model
+message TelemetryMetric {
+  // Canonical metric name stripped of protocol-specific prefixes (e.g. "interface_in_octets_bytes_total")
+  string name = 1;
+
+  // Numeric metric value
+  double value = 2;
+
+  // Epoch timestamp in milliseconds for this metric sample
+  int64 timestamp_ms = 3;
+
+  // Classification type of the metric
+  MetricType type = 4;
+
+  // Key-value dimensional labels including the dedicated `protocol` label
+  // Mandatory keys:
+  // - "target_id": Hostname, IP address, or Node ID of the monitored device
+  // - "protocol": Source protocol identifier ("gnmi-dial-in", "gnmi-dial-out", "snmp", "prom_node-exporter", "gnmi-cisco-mdt", "udp-notif-yang-push", "bmp")
+  map<string, string> labels = 5;
+
+  // Lossless protocol provenance metadata
+  MetricProvenance provenance = 6;
+}
+
+enum MetricType {
+  METRIC_TYPE_UNSPECIFIED = 0;
+  GAUGE = 1;
+  COUNTER = 2;
+  HISTOGRAM = 3;
+  SUMMARY = 4;
+  UNTYPED = 5;
+}
+
+// Lossless protocol provenance metadata preserving native paths, OIDs, and transport context
+message MetricProvenance {
+  // Specific protocol source string ("gnmi-dial-in", "gnmi-dial-out", "snmp", "prom_node-exporter", "gnmi-cisco-mdt", "udp-notif-yang-push", "bmp")
+  string protocol = 1;
+
+  // Network address of the source device or stream endpoint (e.g. "10.0.0.1:57400")
+  string source_address = 2;
+
+  // Monitored device identifier or hostname
+  string target_id = 3;
+
+  // Raw native identifier or path before normalization
+  // Examples:
+  // - SNMP: "1.3.6.1.2.1.31.1.1.1.6.1"
+  // - gNMI OpenConfig: "/interfaces/interface[name='eth0']/state/counters/in-octets"
+  // - Cisco MDT: "Cisco-IOS-XR-infra-statsd-oper:infrastructure-stats/interfaces/interface"
+  // - BMP: "bmp/peer_stats/type_7"
+  string native_path = 4;
+
+  // Subscription or poll group identifier (if applicable)
+  string subscription_id = 5;
+
+  // Private Enterprise Number (PEN) or Enterprise OID (e.g. 9 for Cisco, 2636 for Juniper)
+  uint32 enterprise_id = 6;
+}

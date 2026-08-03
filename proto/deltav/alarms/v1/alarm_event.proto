@@ -1,0 +1,35 @@
+// Copyright (C) 2026 The Delta-V Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package deltav.alarms.v1;
+
+option java_multiple_files = true;
+option java_package = "org.deltav.alarms.v1.proto";
+option go_package = "github.com/pbrane/deltav-proto-contracts/gen/go/deltav/alarms/v1;alarmsv1";
+
+// Alarm event message for alarm lifecycle management
+message AlarmEvent {
+  int32 alarm_id = 1;
+  string uei = 2;
+  int32 node_id = 3;
+  string location = 4;
+  string service_name = 5;
+  int32 severity = 6;
+  string log_message = 7;
+  int64 first_event_time_ms = 8;
+  int64 last_event_time_ms = 9;
+  int32 counter = 10;
+}

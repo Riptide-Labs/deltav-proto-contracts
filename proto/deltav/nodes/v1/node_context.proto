@@ -1,0 +1,43 @@
+// Copyright (C) 2026 The Delta-V Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package deltav.nodes.v1;
+
+option java_multiple_files = true;
+option java_package = "org.deltav.nodes.v1.proto";
+option go_package = "github.com/pbrane/deltav-proto-contracts/gen/go/deltav/nodes/v1;nodesv1";
+
+// Node context metadata message for GlobalKTable joins
+message NodeContext {
+  // Numeric node ID
+  int32 node_id = 1;
+
+  // Foreign node label or identifier
+  string foreign_source = 2;
+  string foreign_id = 3;
+
+  // Node label / hostname
+  string node_label = 4;
+
+  // Logical location name (e.g. "Default", "Site-A")
+  string location = 5;
+
+  // Primary IP address
+  string ip_address = 6;
+
+  // System object OID
+  string sys_object_id = 7;
+}

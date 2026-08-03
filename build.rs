@@ -1,0 +1,15 @@
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tonic_build::configure()
+        .build_server(true)
+        .build_client(true)
+        .compile_protos(
+            &[
+                "proto/deltav/telemetry/v1/telemetry_metric.proto",
+                "proto/deltav/telemetry/v1/telemetry_ingestion_service.proto",
+                "proto/deltav/nodes/v1/node_context.proto",
+                "proto/deltav/alarms/v1/alarm_event.proto",
+            ],
+            &["proto"],
+        )?;
+    Ok(())
+}

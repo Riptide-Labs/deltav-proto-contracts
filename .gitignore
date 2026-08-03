@@ -1,0 +1,11 @@
+# Target build directories
+target/
+gen/
+*.jar
+*.class
+
+# IDE & OS files
+.DS_Store
+.idea/
+*.iml
+.vscode/

@@ -1,0 +1,12 @@
+version: v2
+plugins:
+  - remote: buf.build/protocolbuffers/java:v25.2
+    out: gen/java
+  - remote: buf.build/grpc/java:v1.60.1
+    out: gen/java
+  - remote: buf.build/protocolbuffers/go:v1.32.0
+    out: gen/go
+    opt: paths=source_relative
+  - remote: buf.build/grpc/go:v1.3.0
+    out: gen/go
+    opt: paths=source_relative
