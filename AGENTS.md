@@ -35,8 +35,9 @@ Java and Go stubs through `buf generate` (`buf.gen.yaml`) into `gen/`. `src/lib.
   (`METRIC_TYPE_GAUGE`, not `GAUGE`), and RPC request types must be named `<Method>Request`.
 - The Java and Rust versions must agree. `pom.xml` and `Cargo.toml` carry the same number, bumped
   together in the release commit.
-- `javax.annotation:javax.annotation-api` is a required dependency, not a leftover: grpc-java's
-  generated stubs reference `javax.annotation.Generated`, which `jakarta.annotation-api` does not provide.
+- protobuf-java stays on the 3.25.x line and must not move to 4.x. grpc-java declares 3.25.x through
+  its latest release, and `protobuf.version` also selects protoc, so a 4.x bump ships gencode that
+  consumers on 3.25.x cannot load. The full reasoning is in `pom.xml` next to the property.
 - Workflow actions are pinned to a commit SHA with the full version in a trailing comment. zizmor and
   actionlint enforce this, so an unpinned `uses:` fails CI.
 - Commits are Conventional Commits, signed off (`git commit -s`), with an `Assisted-by:` trailer when
