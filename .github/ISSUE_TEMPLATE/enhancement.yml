@@ -1,0 +1,45 @@
+# Copyright (C) 2026 The Delta-V Authors
+# SPDX-License-Identifier: Apache-2.0
+name: Enhancement
+description: Propose a schema addition or an improvement to the build
+labels: [enhancement, triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What can you not express or do today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: The change you want. For a schema change, sketch the messages or fields.
+      render: proto
+    validations:
+      required: true
+
+  - type: dropdown
+    id: compatibility
+    attributes:
+      label: Compatibility
+      description: Renaming or removing a field, changing a field number or type, or renaming an enum value is breaking.
+      options:
+        - Additive, backwards compatible
+        - Breaking
+        - Not a schema change
+    validations:
+      required: true
+
+  - type: textarea
+    id: migration
+    attributes:
+      label: Migration path
+      description: Required if the change is breaking. How do existing consumers move over?
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
