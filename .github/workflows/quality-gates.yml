@@ -26,9 +26,9 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: bufbuild/buf-setup-action@a47c93e0b1648d5651a065437926377d060baa99 # v1.50.0
+      - uses: bufbuild/buf-action@v1
         with:
-          github_token: ${{ github.token }}
+          setup_only: true
 
       - name: Lint schemas
         run: make lint-proto
@@ -47,10 +47,11 @@ jobs:
         with:
           persist-credentials: false
 
-      # tonic-build shells out to protoc, which is not on the runner image.
-      - uses: arduino/setup-protoc@c65c819552d16ad3c9b72d9dfd5ba5237b9c906b # v3.0.0
-        with:
-          repo-token: ${{ github.token }}
+      # Install protoc natively via apt-get to eliminate Node.js runner deprecation warnings
+      - name: Install protoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
 
       - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
         with:
