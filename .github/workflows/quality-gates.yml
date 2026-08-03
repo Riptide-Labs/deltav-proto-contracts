@@ -1,0 +1,101 @@
+# Copyright (C) 2026 The Delta-V Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+# The single definition of this repository's quality gates. CI, preview builds and
+# releases all call this workflow so none of them can publish through a gate that
+# pull requests enforce.
+name: Quality Gates
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  proto:
+    name: Protobuf lint and breaking-change check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # buf compares the working tree against origin/main, which needs history.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: bufbuild/buf-setup-action@a47c93e0b1648d5651a065437926377d060baa99 # v1.50.0
+        with:
+          github_token: ${{ github.token }}
+
+      - name: Lint schemas
+        run: make lint-proto
+
+      - name: Check for breaking schema changes
+        run: make breaking
+
+  rust:
+    name: Rust build and test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        with:
+          components: rustfmt, clippy
+
+      - name: Lint
+        run: make lint-rust
+
+      - name: Build
+        run: make build-rust
+
+      - name: Test
+        run: make test-rust
+
+  java:
+    name: Java build and test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
+      - name: Build
+        run: make build-java
+
+      - name: Test
+        run: make test-java
+
+  actions:
+    name: Workflow lint (actionlint, zizmor)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: rhysd/actionlint@914e7df21a07ef503a81201c76d2b11c789d3fca # v1.7.12
+
+      - uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
