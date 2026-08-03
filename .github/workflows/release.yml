@@ -40,11 +40,12 @@ jobs:
         with:
           persist-credentials: false
 
+      # Deliberately no dependency cache. A release must not restore a cache that
+      # pull request builds can write to, or a poisoned entry reaches signed artifacts.
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           java-version: '21'
           distribution: temurin
-          cache: maven
 
       - name: Resolve version from tag
         id: version
@@ -105,10 +106,18 @@ jobs:
         with:
           subject-path: 'dist/*.jar, dist/*.tar.gz'
 
+      # gh is on the runner, so the publishing step needs no third-party action.
       - name: Create the draft release
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
-        with:
-          draft: true
-          prerelease: ${{ contains(github.ref_name, '-') }}
-          files: dist/*
-          fail_on_unmatched_files: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          prerelease=""
+          case "${TAG}" in
+            *-*) prerelease="--prerelease" ;;
+          esac
+          # shellcheck disable=SC2086
+          gh release create "${TAG}" dist/* \
+            --draft ${prerelease} \
+            --title "${TAG}" \
+            --notes "Draft. Notes are curated before publishing; see RELEASING.md."

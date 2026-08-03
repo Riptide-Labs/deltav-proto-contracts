@@ -38,11 +38,12 @@ jobs:
         with:
           persist-credentials: false
 
+      # No dependency cache here either: these artifacts are signed, and a cache a
+      # pull request build can write must not reach them.
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           java-version: '21'
           distribution: temurin
-          cache: maven
 
       - name: Build artifacts
         run: make package
@@ -68,16 +69,17 @@ jobs:
             --output-signature dist/checksums.txt.sig \
             --output-certificate dist/checksums.txt.pem
 
+      # gh is on the runner, so the publishing step needs no third-party action.
       - name: Publish the preview prerelease
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
-        with:
-          tag_name: preview
-          name: Preview build
-          body: |
-            Rolling build of `main`, replaced on every push. Not a release.
-
-            Built from ${{ github.sha }}. Use a version tag for anything real.
-          prerelease: true
-          make_latest: 'false'
-          files: dist/*
-          fail_on_unmatched_files: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+        run: |
+          # Roll the previous preview over, tag included, so the tag tracks main.
+          gh release delete preview --yes --cleanup-tag || true
+          printf 'Rolling build of `main`, replaced on every push. Not a release.\n\nBuilt from %s. Use a version tag for anything real.\n' "${SHA}" > notes.md
+          gh release create preview dist/* \
+            --prerelease \
+            --target "${SHA}" \
+            --title "Preview build" \
+            --notes-file notes.md
