@@ -1,25 +1,39 @@
-# Delta-V Protobuf Contracts (`deltav-proto-contracts`)
+# Delta-V Protobuf Contracts
 
 [![CI](https://github.com/Riptide-Labs/deltav-proto-contracts/actions/workflows/ci.yml/badge.svg)](https://github.com/Riptide-Labs/deltav-proto-contracts/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/Riptide-Labs/deltav-proto-contracts?sort=semver)](https://github.com/Riptide-Labs/deltav-proto-contracts/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-The canonical **Apache-2.0 licensed Protocol Buffer schemas and gRPC contracts** for OpenNMS Delta-V multi-protocol telemetry, streaming metrics, node contexts, and alarm events.
+The canonical **Apache-2.0 licensed Protocol Buffer schemas and gRPC contracts** for Delta-V multi-protocol telemetry, streaming metrics, flow records, node contexts, and alarm events.
 
-Delta-V services do not define their own wire formats. They consume the artifacts published here, so every service speaks the same schema and a contract change is reviewed in one place.
-This repository replaces the legacy `deltav-timeseries.proto` with the Prometheus-aligned `telemetry_metric.proto` schema and the gRPC `TelemetryIngestionService`.
+## Overview
 
-## Contracts
+Delta-V services do not define independent wire formats. Instead, all microservices consume the generated language artifacts published from this repository. This guarantees that every service speaks the exact same schema and ensures that any contract modification undergoes centralized compatibility review.
 
-- **Telemetry metrics** (`deltav.telemetry.v1.TelemetryMetricBatch`) — Prometheus-compatible dimensional vector model: `name`, `double value`, `map<string, string> labels`, `MetricProvenance`.
-- **Protocol label** — the `protocol` label preserves the source: `gnmi-dial-in`, `gnmi-dial-out`, `snmp`, `prom_node-exporter`, `gnmi-cisco-mdt`, `udp-notif-yang-push`, `bmp`.
-- **Ingestion** (`deltav.telemetry.v1.TelemetryIngestionService`) — HTTP/2 client-streaming gRPC endpoint for edge collectors.
-- **Node context** (`deltav.nodes.v1.NodeContext`) — metadata schema for Kafka GlobalKTable topology joins.
-- **Alarm lifecycle** (`deltav.alarms.v1.AlarmEvent`) — fault alarm state management.
+### Key Highlights
 
-## Quick start
+- **Single Source of Truth**: All protobuf definitions reside under `proto/deltav/`.
+- **Multi-Language Support**: Automated generation of Java (Maven), Rust (`prost`/`tonic`), and Go stubs (`buf`).
+- **Compatibility-First**: Enforced backward-compatibility checks via `buf` and `make breaking` in CI.
+
+---
+
+## Schema Contracts
+
+| Package | Proto Path | Key Types & Services | Description |
+| :--- | :--- | :--- | :--- |
+| `deltav.telemetry.v1` | `proto/deltav/telemetry/v1/` | `TelemetryMetricBatch`, `TelemetryIngestionService` | Prometheus-aligned dimensional metrics vector model (`labels`, `MetricProvenance`) and client-streaming gRPC ingestion endpoint. |
+| `deltav.flows.v1` | `proto/deltav/flows/v1/` | `FlowEnvelope`, `NormalisedFlow`, `FlowIngestionService` | Flow envelopes, normalized NetFlow/IPFIX/sFlow flow records, and gRPC ingestion service. |
+| `deltav.nodes.v1` | `proto/deltav/nodes/v1/` | `NodeContext`, `CompiledNetworkNodeConfig` | Node metadata for Kafka GlobalKTable topology joins and compiled network node GitOps configurations. |
+| `deltav.alarms.v1` | `proto/deltav/alarms/v1/` | `AlarmEvent` | Fault alarm lifecycle state management and event propagation. |
+
+---
+
+## Getting Started
 
 ### Java (Maven)
+
+Add the dependency to your `pom.xml`:
 
 ```xml
 <dependency>
@@ -29,37 +43,93 @@ This repository replaces the legacy `deltav-timeseries.proto` with the Prometheu
 </dependency>
 ```
 
+```java
+import org.deltav.telemetry.v1.proto.TelemetryMetricBatch;
+
+TelemetryMetricBatch batch = TelemetryMetricBatch.newBuilder()
+    .build();
+```
+
 ### Rust (Cargo)
+
+Add the dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
 deltav-proto-contracts = { git = "https://github.com/Riptide-Labs/deltav-proto-contracts.git", tag = "v1.0.0" }
 ```
 
+Usage in Rust:
+
 ```rust
-use deltav_proto_contracts::telemetry::v1::{MetricType, TelemetryMetric, TelemetryMetricBatch};
+use deltav_proto_contracts::telemetry::v1::{MetricType, TelemetryMetricBatch};
 
 let batch = TelemetryMetricBatch::default();
 let kind = MetricType::Gauge; // prost strips the METRIC_TYPE_ prefix
 ```
 
-## Building from source
+### Go (Buf Stubs)
 
-`make` is the entry point for everything. Requires JDK 21, a Rust toolchain, [`protoc`](https://github.com/protocolbuffers/protobuf/releases) and [`buf`](https://buf.build/docs/installation).
+Generated Go stubs are available under `gen/go/`:
 
-```bash
-make verify     # lint + build + test, the same gate CI runs
-make build      # Java and Rust artifacts
-make breaking   # schema backwards-compatibility check
-make help       # every target
+```go
+import (
+    telemetryv1 "github.com/Riptide-Labs/deltav-proto-contracts/gen/go/deltav/telemetry/v1"
+)
 ```
 
-## Documentation
+---
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) — sign-off, AI-assistance disclosure, and what makes a schema change breaking
-- [RELEASING.md](RELEASING.md) — versioning, how a release is cut, and how to verify signatures
-- [SECURITY.md](SECURITY.md) — reporting a vulnerability
+## Development & Building
+
+> [!IMPORTANT]
+> `make` is the sole entry point for building, testing, and linting. CI runs these exact Makefile targets.
+
+### Prerequisites
+
+- **JDK 21**
+- **Rust Toolchain** (latest stable)
+- **[`protoc`](https://github.com/protocolbuffers/protobuf/releases)**
+- **[`buf`](https://buf.build/docs/installation)**
+
+### Common Commands
+
+```bash
+make verify     # Run complete verification gate (lint + build + test)
+make build      # Compile Java (Maven) and Rust (Cargo) artifacts
+make test       # Run Java and Rust test suites
+make lint       # Run buf lint, rustfmt, and clippy
+make breaking   # Check backwards compatibility against origin/main
+make help       # Display detailed target help
+```
+
+---
+
+## Repository Structure
+
+```
+├── proto/deltav/          # Canonical Protobuf schema definitions
+│   ├── telemetry/v1/      # Streaming metrics & ingestion service
+│   ├── flows/v1/          # Flow records & flow ingestion service
+│   ├── nodes/v1/          # Node context & GitOps node configuration
+│   └── alarms/v1/         # Alarm lifecycle events
+├── gen/                   # Generated Go & Java stubs (via buf)
+├── src/                   # Rust crate wrapper (include_proto!)
+├── pom.xml                # Java Maven build configuration
+└── Cargo.toml             # Rust Cargo build configuration
+```
+
+---
+
+## Documentation & Governance
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — DCO sign-off, AI-assistance disclosure, and breaking change rules
+- [RELEASING.md](RELEASING.md) — Versioning strategy, release workflow, and signature verification
+- [SECURITY.md](SECURITY.md) — Vulnerability reporting policy
+
+---
 
 ## License
 
-Apache License, Version 2.0. See [LICENSE](LICENSE).
+Distributed under the [Apache License, Version 2.0](LICENSE).
+
