@@ -25,6 +25,24 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!--
+            Stay on the protobuf-java 3.25.x line. Do not move to 4.x.
+
+            grpc-java has not moved: every release through 1.83.1 declares
+            protobuf-java 3.25.x, and 3.25.x still receives patch releases.
+            Going to 4.x would put these contracts ahead of the only gRPC stack
+            that consumes them, on a pairing Google does not test.
+
+            This property also selects protoc (see protocArtifact below), so
+            bumping it regenerates the stubs with 4.x gencode that calls
+            RuntimeVersion.validateProtobufGencodeVersion. That class does not
+            exist in protobuf-java 3.25.x, so every consumer resolving 3.25.x
+            fails with NoClassDefFoundError on first use of any message class.
+            CI cannot catch it: CI only ever runs against the new version.
+
+            Revisit when grpc-java's own pom moves to 4.x. Dependabot is
+            configured to skip the major bump until then.
+        -->
         <protobuf.version>3.25.5</protobuf.version>
         <grpc.version>1.62.2</grpc.version>
     </properties>

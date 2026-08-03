@@ -57,6 +57,13 @@ updates:
       - dependencies
     commit-message:
       prefix: build
+    ignore:
+      # Stay on the protobuf-java 3.25.x line; see the rationale in pom.xml.
+      # grpc-java declares 3.25.x through its latest release, so a 4.x bump
+      # would take these contracts off the supported pairing. Patches still flow.
+      - dependency-name: com.google.protobuf:protobuf-java
+        update-types:
+          - version-update:semver-major
     groups:
       # protobuf-java and grpc-java must move together. protobuf.version also
       # selects protoc, so bumping it alone regenerates the stubs against a
