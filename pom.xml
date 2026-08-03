@@ -43,8 +43,8 @@
             Revisit when grpc-java's own pom moves to 4.x. Dependabot is
             configured to skip the major bump until then.
         -->
-        <protobuf.version>3.25.5</protobuf.version>
-        <grpc.version>1.62.2</grpc.version>
+        <protobuf.version>3.25.9</protobuf.version>
+        <grpc.version>1.83.1</grpc.version>
     </properties>
 
     <dependencies>
@@ -62,12 +62,6 @@
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
             <version>${grpc.version}</version>
-        </dependency>
-        <!-- grpc-java's generated stubs reference javax.annotation.Generated -->
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>1.3.2</version>
         </dependency>
         <dependency>
             <groupId>jakarta.annotation</groupId>
