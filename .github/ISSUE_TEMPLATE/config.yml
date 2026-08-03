@@ -1,0 +1,7 @@
+# Copyright (C) 2026 The Delta-V Authors
+# SPDX-License-Identifier: Apache-2.0
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Riptide-Labs/deltav-proto-contracts/security/advisories/new
+    about: Report privately, never as a public issue. See SECURITY.md.
