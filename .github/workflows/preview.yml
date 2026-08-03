@@ -77,7 +77,7 @@ jobs:
         run: |
           # Roll the previous preview over, tag included, so the tag tracks main.
           gh release delete preview --yes --cleanup-tag || true
-          printf 'Rolling build of `main`, replaced on every push. Not a release.\n\nBuilt from %s. Use a version tag for anything real.\n' "${SHA}" > notes.md
+          printf 'Rolling build of main, replaced on every push. Not a release.\n\nBuilt from %s. Use a version tag for anything real.\n' "${SHA}" > notes.md
           gh release create preview dist/* \
             --prerelease \
             --target "${SHA}" \
