@@ -58,11 +58,11 @@ message TelemetryMetric {
 
 enum MetricType {
   METRIC_TYPE_UNSPECIFIED = 0;
-  GAUGE = 1;
-  COUNTER = 2;
-  HISTOGRAM = 3;
-  SUMMARY = 4;
-  UNTYPED = 5;
+  METRIC_TYPE_GAUGE = 1;
+  METRIC_TYPE_COUNTER = 2;
+  METRIC_TYPE_HISTOGRAM = 3;
+  METRIC_TYPE_SUMMARY = 4;
+  METRIC_TYPE_UNTYPED = 5;
 }
 
 // Lossless protocol provenance metadata preserving native paths, OIDs, and transport context
