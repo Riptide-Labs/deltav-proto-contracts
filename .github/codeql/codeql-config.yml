@@ -11,3 +11,7 @@ paths-ignore:
   - 'target/generated-sources/**'
   - '**/generated-sources/**'
   - 'gen/**'
+
+query-filters:
+  - exclude:
+      id: java/missing-override-annotation
