@@ -149,6 +149,11 @@ message FlowEnvelope {
 // EVERY FIELD IS `optional` DELIBERATELY, and it is a security requirement
 // rather than a style choice. See FlowEnvelope.tenancy.
 //
+// SECURITY DIRECTIVE FOR GATEWAYS: Gateway implementations MUST explicitly set
+// every field (e.g. `tenant: Some("")` if unassigned) when stamping tenancy.
+// Omitting a field leaves protobuf concatenation merge semantics to fall back to
+// any untrusted producer claim for that field.
+//
 // `zone` and `system` correspond to the delta-v `location` and `system_id`
 // respectively, so a Minion-compatible gateway can populate this from the
 // identity metadata headers it already receives.
