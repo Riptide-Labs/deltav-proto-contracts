@@ -19,7 +19,7 @@ package deltav.nodes.v1;
 
 option java_multiple_files = true;
 option java_package = "org.deltav.nodes.v1.proto";
-option go_package = "github.com/pbrane/deltav-proto-contracts/gen/go/deltav/nodes/v1;nodesv1";
+option go_package = "github.com/Riptide-Labs/deltav-proto-contracts/gen/go/deltav/nodes/v1;nodesv1";
 
 // Compiled, resolved network node configuration emitted to Kafka topic `deltav-nodes-config`
 message CompiledNetworkNodeConfig {
