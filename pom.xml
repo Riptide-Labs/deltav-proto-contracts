@@ -43,8 +43,8 @@
             Revisit when grpc-java's own pom moves to 4.x. Dependabot is
             configured to skip the major bump until then.
         -->
-        <protobuf.version>3.25.5</protobuf.version>
-        <grpc.version>1.62.2</grpc.version>
+        <protobuf.version>3.25.9</protobuf.version>
+        <grpc.version>1.83.0</grpc.version>
     </properties>
 
     <dependencies>
@@ -88,7 +88,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
