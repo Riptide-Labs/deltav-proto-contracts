@@ -10,6 +10,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "proto/deltav/telemetry/v1/telemetry_metric.proto",
                 "proto/deltav/telemetry/v1/telemetry_ingestion_service.proto",
                 "proto/deltav/nodes/v1/node_context.proto",
+                "proto/deltav/nodes/v1/node_config.proto",
                 "proto/deltav/alarms/v1/alarm_event.proto",
                 "proto/deltav/flows/v1/flow_envelope.proto",
                 "proto/deltav/flows/v1/flow_ingestion_service.proto",
