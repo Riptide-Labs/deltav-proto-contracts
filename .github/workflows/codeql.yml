@@ -45,7 +45,7 @@ jobs:
         with:
           languages: java-kotlin
           build-mode: manual
-          queries: security-and-quality
+          config-file: .github/codeql/codeql-config.yml
 
       - name: Build
         run: make build-java

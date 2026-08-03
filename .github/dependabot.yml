@@ -9,6 +9,8 @@ updates:
     schedule:
       interval: weekly
       day: monday
+    cooldown:
+      default-days: 7
     labels:
       - dependencies
     commit-message:
@@ -26,6 +28,8 @@ updates:
     schedule:
       interval: weekly
       day: monday
+    cooldown:
+      default-days: 7
     labels:
       - dependencies
     commit-message:
@@ -43,6 +47,8 @@ updates:
     schedule:
       interval: weekly
       day: monday
+    cooldown:
+      default-days: 7
     labels:
       - dependencies
     commit-message:

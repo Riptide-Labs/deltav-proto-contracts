@@ -1,4 +1,5 @@
 // Copyright (C) 2026 The Delta-V Authors
+// SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +19,7 @@ package deltav.telemetry.v1;
 
 option java_multiple_files = true;
 option java_package = "org.deltav.telemetry.v1.proto";
-option go_package = "github.com/pbrane/deltav-proto-contracts/gen/go/deltav/telemetry/v1;telemetryv1";
+option go_package = "github.com/Riptide-Labs/deltav-proto-contracts/gen/go/deltav/telemetry/v1;telemetryv1";
 
 // Envelope carrying a batch of normalized telemetry metrics
 message TelemetryMetricBatch {

@@ -1,0 +1,123 @@
+# Copyright (C) 2026 The Delta-V Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+# Triggered only by a version tag. Builds, signs and attaches the artifacts to a
+# draft release; the notes are curated and published by hand. See RELEASING.md.
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+concurrency:
+  # Never cancel a release: a half-published release is worse than a slow one.
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gates:
+    name: Quality gates
+    uses: ./.github/workflows/quality-gates.yml
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+
+  release:
+    name: Build, sign and draft the release
+    needs: gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Deliberately no dependency cache. A release must not restore a cache that
+      # pull request builds can write to, or a poisoned entry reaches signed artifacts.
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          java-version: '21'
+          distribution: temurin
+
+      - name: Resolve version from tag
+        id: version
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          version="${REF_NAME#v}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Check the manifests match the tag
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          pom_version="$(mvn -q -B help:evaluate -Dexpression=project.version -DforceStdout)"
+          cargo_version="$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)"
+          if [ "${pom_version}" != "${VERSION}" ] || [ "${cargo_version}" != "${VERSION}" ]; then
+            echo "tag ${VERSION} does not match pom.xml (${pom_version}) or Cargo.toml (${cargo_version})" >&2
+            echo "bump the manifests in a chore(release) commit before tagging; see RELEASING.md" >&2
+            exit 1
+          fi
+
+      - name: Build artifacts
+        run: make package
+
+      - name: Collect artifacts
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir -p dist
+          cp "target/deltav-proto-contracts-${VERSION}.jar" dist/
+          cp "target/deltav-proto-contracts-${VERSION}-sources.jar" dist/
+          tar -czf "dist/proto-${VERSION}.tar.gz" proto
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          path: .
+          format: spdx-json
+          artifact-name: sbom.spdx.json
+          output-file: dist/sbom.spdx.json
+
+      - name: Write checksums
+        run: |
+          cd dist
+          sha256sum ./* > checksums.txt
+          cat checksums.txt
+
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Sign the checksums
+        run: |
+          cosign sign-blob --yes dist/checksums.txt \
+            --output-signature dist/checksums.txt.sig \
+            --output-certificate dist/checksums.txt.pem
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        with:
+          subject-path: 'dist/*.jar, dist/*.tar.gz'
+
+      # gh is on the runner, so the publishing step needs no third-party action.
+      - name: Create the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          prerelease=""
+          case "${TAG}" in
+            *-*) prerelease="--prerelease" ;;
+          esac
+          # shellcheck disable=SC2086
+          gh release create "${TAG}" dist/* \
+            --draft ${prerelease} \
+            --title "${TAG}" \
+            --notes "Draft. Notes are curated before publishing; see RELEASING.md."

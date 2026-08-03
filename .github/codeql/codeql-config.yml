@@ -1,0 +1,11 @@
+# Copyright (C) 2026 The Delta-V Authors
+# SPDX-License-Identifier: Apache-2.0
+name: deltav-proto-contracts
+
+queries:
+  - uses: security-and-quality
+
+paths-ignore:
+  # Protobuf and gRPC stubs, regenerated on every build. Findings here are not
+  # actionable: the fix would be upstream in protoc or grpc-java, not in this repo.
+  - target/generated-sources
