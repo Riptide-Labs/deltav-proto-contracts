@@ -6,7 +6,7 @@
 
     <groupId>org.deltav.contracts</groupId>
     <artifactId>deltav-proto-contracts</artifactId>
-    <version>1.0.0</version>
+    <version>0.1.0</version>
     <packaging>jar</packaging>
 
     <name>Delta-V Protobuf Contracts</name>
