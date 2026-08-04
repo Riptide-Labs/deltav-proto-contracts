@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 authors = ["The Delta-V Authors"]
 license = "Apache-2.0"
-description = "Canonical Apache 2.0 licensed Protobuf schemas and gRPC contracts for Delta-V multi-protocol telemetry."
+description = "Canonical Apache 2.0 licensed Protobuf schemas and gRPC contracts for Delta-V multi-protocol telemetry, flow records, node contexts, and alarm events."
 repository = "https://github.com/Riptide-Labs/deltav-proto-contracts"
 
 [dependencies]
