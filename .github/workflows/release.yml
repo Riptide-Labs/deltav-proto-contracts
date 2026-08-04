@@ -80,7 +80,7 @@ jobs:
           tar -czf "dist/proto-${VERSION}.tar.gz" proto
 
       - name: Install cargo-cyclonedx
-        uses: taiki-e/install-action@07b4745ed30d97034c0e66d9c3f566a50438a164 # v2.83.4
+        uses: taiki-e/install-action@67729d5c413db75907f0ad1e39bb04b9c868ff60 # v2.85.7
         with:
           tool: cargo-cyclonedx
 
