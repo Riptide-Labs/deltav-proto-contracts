@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>Delta-V Protobuf Contracts</name>
-    <description>Canonical Apache 2.0 licensed Protobuf schemas and gRPC contracts for Delta-V multi-protocol telemetry and events.</description>
+    <description>Canonical Apache 2.0 licensed Protobuf schemas and gRPC contracts for Delta-V multi-protocol telemetry, flow records, node contexts, and alarm events.</description>
     <url>https://github.com/Riptide-Labs/deltav-proto-contracts</url>
 
     <licenses>
