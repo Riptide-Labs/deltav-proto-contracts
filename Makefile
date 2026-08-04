@@ -9,6 +9,7 @@ BUF   ?= buf
 
 MVNFLAGS   ?= -B --no-transfer-progress
 CARGOFLAGS ?= --locked
+VERSION    ?= $(shell grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)
 
 # Reference the schemas are checked against for backwards compatibility. Resolved
 # from the local clone so the check needs no network access or repo credentials.
@@ -69,6 +70,17 @@ test-rust: ## Run the Rust tests
 .PHONY: generate
 generate: ## Generate Java and Go stubs into gen/ via buf
 	$(BUF) generate
+
+.PHONY: sbom-html
+sbom-html: ## Generate the HTML SBOM report (deltav-proto-contracts-<version>-sbom.html)
+	mkdir -p target
+	cargo cyclonedx --format json --spec-version 1.5 --override-filename sbom.cdx
+	mv sbom.cdx.json target/
+	docker run --rm -v "$$(pwd):/work" ghcr.io/no42-org/blitsbom:report-0.7.0 \
+		/work/target/sbom.cdx.json \
+		--project deltav-proto-contracts \
+		--version $(VERSION) \
+		--output /work/target/deltav-proto-contracts-$(VERSION)-sbom.html
 
 .PHONY: clean
 clean: ## Remove all build output

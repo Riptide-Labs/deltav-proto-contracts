@@ -79,13 +79,21 @@ jobs:
           cp "target/deltav-proto-contracts-${VERSION}-sources.jar" dist/
           tar -czf "dist/proto-${VERSION}.tar.gz" proto
 
-      - name: Generate SBOM
-        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+      - name: Install cargo-cyclonedx
+        uses: taiki-e/install-action@67729d5c413db75907f0ad1e39bb04b9c868ff60 # v2.85.7
         with:
-          path: .
-          format: spdx-json
-          artifact-name: sbom.spdx.json
-          output-file: dist/sbom.spdx.json
+          tool: cargo-cyclonedx
+
+      - name: Generate SBOM
+        run: |
+          cargo cyclonedx --format json --spec-version 1.5 --override-filename sbom.cdx
+          mv sbom.cdx.json dist/
+
+      - name: Generate SBOM HTML report
+        uses: no42-org/blitsbom@fe66bcc08b9cdf2ac3fbb5b00b9d761a3eec1e84 # v0.7.0
+        with:
+          sbom: dist/sbom.cdx.json
+          output: dist/deltav-proto-contracts-${{ steps.version.outputs.version }}-sbom.html
 
       - name: Write checksums
         run: |
