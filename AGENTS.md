@@ -21,7 +21,7 @@ Needs JDK 21, a Rust toolchain, `protoc`, and `buf`.
 
 ## Layout
 
-`proto/deltav/{telemetry,nodes,alarms}/v1/` holds the schemas. Everything else is generated from them:
+`proto/deltav/{telemetry,flows,nodes,alarms}/v1/` holds the schemas. Everything else is generated from them:
 the Rust crate through `build.rs` + `tonic-build`, the Java artifact through `protobuf-maven-plugin`,
 Java and Go stubs through `buf generate` (`buf.gen.yaml`) into `gen/`. `src/lib.rs` is only
 `include_proto!` wrappers, so there is no hand-written logic to change here.
