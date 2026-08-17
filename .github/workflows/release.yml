@@ -23,8 +23,8 @@ jobs:
     uses: ./.github/workflows/quality-gates.yml
     permissions:
       contents: read
-      actions: read
-      security-events: write
+      actions: read # the called zizmor gate reads workflow run metadata
+      security-events: write # the called zizmor gate uploads SARIF
 
   release:
     name: Build, sign and draft the release
@@ -32,9 +32,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
-      contents: write
-      id-token: write
-      attestations: write
+      contents: write # creates the draft release and uploads the artifacts
+      id-token: write # cosign keyless signing and provenance via GitHub OIDC
+      attestations: write # attest-build-provenance persists the attestation
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -107,11 +107,15 @@ jobs:
         run: |
           cosign sign-blob --yes dist/checksums.txt --bundle dist/checksums.txt.bundle
 
+      # RELEASING.md tells consumers to run 'gh attestation verify', so this step
+      # failing has to fail the release. It was tolerated while the repository was
+      # private, where attestation is unavailable; the repository is public now.
       - name: Attest build provenance
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
-        continue-on-error: true
         with:
-          subject-path: 'dist/*.jar, dist/*.tar.gz'
+          subject-path: |
+            dist/*.jar
+            dist/*.tar.gz
 
       # gh is on the runner, so the publishing step needs no third-party action.
       - name: Create the draft release

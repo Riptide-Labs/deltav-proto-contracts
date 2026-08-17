@@ -20,8 +20,8 @@ jobs:
     uses: ./.github/workflows/quality-gates.yml
     permissions:
       contents: read
-      actions: read
-      security-events: write
+      actions: read # the called zizmor gate reads workflow run metadata
+      security-events: write # the called zizmor gate uploads SARIF
 
   dependency-review:
     name: Dependency review
@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: write # dependency-review comments its summary on the PR
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
