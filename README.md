@@ -34,24 +34,34 @@ Delta-V services do not define independent wire formats. Instead, all microservi
 
 ### Java (Maven)
 
-The JAR is not published to a Maven repository yet. Download it from the [latest release](https://github.com/Riptide-Labs/deltav-proto-contracts/releases/latest) and install it into your local repository:
-
-```bash
-mvn install:install-file \
-    -Dfile=deltav-proto-contracts-0.1.0.jar \
-    -DgroupId=org.deltav.contracts \
-    -DartifactId=deltav-proto-contracts \
-    -Dversion=0.1.0 \
-    -Dpackaging=jar
-```
-
-Then declare the dependency in your `pom.xml`:
+Releases from v0.1.1 onward are published to [GitHub Packages](https://github.com/Riptide-Labs/deltav-proto-contracts/packages).
+GitHub requires authentication to download packages, even public ones.
+Add a [personal access token](https://github.com/settings/tokens) with the `read:packages` scope to your `~/.m2/settings.xml`:
 
 ```xml
+<servers>
+    <server>
+        <id>github</id>
+        <username>YOUR_GITHUB_USERNAME</username>
+        <password>YOUR_TOKEN</password>
+    </server>
+</servers>
+```
+
+Then add the repository and the dependency to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>github</id>
+        <url>https://maven.pkg.github.com/Riptide-Labs/deltav-proto-contracts</url>
+    </repository>
+</repositories>
+
 <dependency>
-    <groupId>org.deltav.contracts</groupId>
+    <groupId>io.github.riptide-labs</groupId>
     <artifactId>deltav-proto-contracts</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 </dependency>
 ```
 

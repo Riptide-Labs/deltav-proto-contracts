@@ -4,7 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.deltav.contracts</groupId>
+    <!--
+        io.github.riptide-labs, not org.deltav: Maven Central verifies group ids
+        against domain ownership, and deltav.org has belonged to someone else
+        since 1999. The io.github namespace is verifiable through this GitHub
+        org, so publishing to Central later needs no coordinate migration.
+        The Java package of the generated code (org.deltav.*) is unaffected.
+    -->
+    <groupId>io.github.riptide-labs</groupId>
     <artifactId>deltav-proto-contracts</artifactId>
     <version>0.1.0</version>
     <packaging>jar</packaging>
@@ -20,6 +27,31 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <developers>
+        <developer>
+            <name>The Delta-V Authors</name>
+            <organization>Riptide-Labs</organization>
+            <organizationUrl>https://github.com/Riptide-Labs</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/Riptide-Labs/deltav-proto-contracts.git</connection>
+        <developerConnection>scm:git:git@github.com:Riptide-Labs/deltav-proto-contracts.git</developerConnection>
+        <url>https://github.com/Riptide-Labs/deltav-proto-contracts</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <!-- The id must match the server id in the settings.xml that
+                 actions/setup-java generates in CI (its default is 'github'). -->
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/Riptide-Labs/deltav-proto-contracts</url>
+        </repository>
+    </distributionManagement>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

@@ -35,6 +35,7 @@ jobs:
       contents: write # creates the draft release and uploads the artifacts
       id-token: write # cosign keyless signing and provenance via GitHub OIDC
       attestations: write # attest-build-provenance persists the attestation
+      packages: write # mvn deploy publishes the JAR to GitHub Packages
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -116,6 +117,14 @@ jobs:
           subject-path: |
             dist/*.jar
             dist/*.tar.gz
+
+      # setup-java already wrote a settings.xml whose server id 'github' matches
+      # the pom's distributionManagement; it reads these two env variables.
+      - name: Publish to GitHub Packages
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: make deploy
 
       # gh is on the runner, so the publishing step needs no third-party action.
       - name: Create the draft release
