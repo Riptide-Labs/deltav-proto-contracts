@@ -126,7 +126,7 @@ make help       # Display detailed target help
 │   ├── flows/v1/          # Flow records & flow ingestion service
 │   ├── nodes/v1/          # Node context & GitOps node configuration
 │   └── alarms/v1/         # Alarm lifecycle events
-├── gen/                   # Generated Go & Java stubs (via buf) — build output, not committed
+├── gen/                   # Generated Go & Java stubs (via buf): build output, not committed
 ├── src/                   # Rust crate wrapper (include_proto!)
 ├── pom.xml                # Java Maven build configuration
 └── Cargo.toml             # Rust Cargo build configuration
