@@ -32,4 +32,5 @@ Security reports are the exception and follow the timelines in [SECURITY.md](SEC
 
 ## Contributing a fix
 
-Faster than waiting: [CONTRIBUTING.md](CONTRIBUTING.md) covers DCO sign-off, the Conventional Commit format, and the backwards-compatibility rules that govern schema changes.
+Faster than waiting, but work starts from an issue here too: open one, then the pull request that references it.
+[CONTRIBUTING.md](CONTRIBUTING.md) covers the rest: DCO sign-off, the Conventional Commit format, and the backwards-compatibility rules that govern schema changes.
