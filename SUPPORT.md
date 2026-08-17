@@ -32,5 +32,5 @@ Security reports are the exception and follow the timelines in [SECURITY.md](SEC
 
 ## Contributing a fix
 
-Faster than waiting, but work starts from an issue here too: open one, then the pull request that references it.
+Faster than waiting. Work starts from an issue here too, so open one first and reference it from your pull request.
 [CONTRIBUTING.md](CONTRIBUTING.md) covers the rest: DCO sign-off, the Conventional Commit format, and the backwards-compatibility rules that govern schema changes.
