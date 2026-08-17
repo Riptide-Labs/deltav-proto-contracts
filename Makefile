@@ -56,6 +56,10 @@ build-rust: ## Build the Rust crate
 package: ## Build the release artifacts (JAR + sources JAR)
 	$(MVN) $(MVNFLAGS) clean package
 
+.PHONY: deploy
+deploy: ## Publish the Java artifact to GitHub Packages (CI; needs GITHUB_ACTOR and GITHUB_TOKEN)
+	$(MVN) $(MVNFLAGS) deploy
+
 .PHONY: test
 test: test-java test-rust ## Run the Java and Rust test suites
 
