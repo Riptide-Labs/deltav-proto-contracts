@@ -9,9 +9,6 @@ Only the latest released minor version of `deltav-proto-contracts` receives secu
 Report vulnerabilities privately through GitHub's [private vulnerability reporting](https://github.com/Riptide-Labs/deltav-proto-contracts/security/advisories/new).
 This opens a draft advisory visible only to you and the maintainers.
 
-While this repository is private, GitHub does not offer private vulnerability reporting on it.
-Until it is made public, contact a Riptide-Labs maintainer directly instead.
-
 Do not open a public issue for a security problem, and do not disclose it publicly before a fix is available.
 
 Please include:

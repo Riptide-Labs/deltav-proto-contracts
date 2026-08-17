@@ -101,6 +101,9 @@ The identity regexp pins the signature to this repository's release workflow run
 gh attestation verify deltav-proto-contracts-1.1.0.jar --repo Riptide-Labs/deltav-proto-contracts
 ```
 
+v0.1.0 is the exception: it was built while the repository was private, where GitHub does not offer attestation, so it carries no provenance and this command returns a 404 for it.
+Its checksums and cosign signature verify normally.
+
 ## Preview builds
 
 Every push to `main` refreshes a single rolling `preview` prerelease with artifacts built from that commit.
