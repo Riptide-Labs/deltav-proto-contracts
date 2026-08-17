@@ -57,8 +57,17 @@ package: ## Build the release artifacts (JAR + sources JAR)
 	$(MVN) $(MVNFLAGS) clean package
 
 .PHONY: deploy
-deploy: ## Publish the Java artifact to GitHub Packages (CI; needs GITHUB_ACTOR and GITHUB_TOKEN)
-	$(MVN) $(MVNFLAGS) deploy
+deploy: ## Publish the built Java artifact to GitHub Packages (CI only; runs after 'make package')
+	@test -n "$$GITHUB_ACTIONS" || { echo "make deploy runs only in CI. Cut a release instead; see RELEASING.md." >&2; exit 1; }
+	# deploy:deploy-file publishes the jars 'make package' already built, so the
+	# bytes on GitHub Packages are the bytes that were checksummed, signed and
+	# attested. A plain 'mvn deploy' would rebuild and break that equality.
+	$(MVN) $(MVNFLAGS) deploy:deploy-file \
+		-DrepositoryId=github \
+		-Durl=https://maven.pkg.github.com/Riptide-Labs/deltav-proto-contracts \
+		-DpomFile=pom.xml \
+		-Dfile=target/deltav-proto-contracts-$(VERSION).jar \
+		-Dsources=target/deltav-proto-contracts-$(VERSION)-sources.jar
 
 .PHONY: test
 test: test-java test-rust ## Run the Java and Rust test suites

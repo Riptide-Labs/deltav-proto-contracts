@@ -34,7 +34,8 @@ Delta-V services do not define independent wire formats. Instead, all microservi
 
 ### Java (Maven)
 
-Releases from v0.1.1 onward are published to [GitHub Packages](https://github.com/Riptide-Labs/deltav-proto-contracts/packages).
+Releases after v0.1.0 are published to [GitHub Packages](https://github.com/Riptide-Labs/deltav-proto-contracts/packages).
+v0.1.0 itself predates the publication and exists only as a [release asset](https://github.com/Riptide-Labs/deltav-proto-contracts/releases/tag/v0.1.0).
 GitHub requires authentication to download packages, even public ones.
 Add a [personal access token](https://github.com/settings/tokens) with the `read:packages` scope to your `~/.m2/settings.xml`:
 
@@ -61,7 +62,8 @@ Then add the repository and the dependency to your `pom.xml`:
 <dependency>
     <groupId>io.github.riptide-labs</groupId>
     <artifactId>deltav-proto-contracts</artifactId>
-    <version>0.1.1</version>
+    <!-- Use the version shown by the Release badge above. -->
+    <version>x.y.z</version>
 </dependency>
 ```
 

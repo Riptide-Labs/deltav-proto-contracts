@@ -77,6 +77,7 @@ Attached to the GitHub Release:
 SLSA build provenance is attested for each artifact and is verifiable with `gh attestation verify`.
 
 The pipeline also publishes the Java artifact to [GitHub Packages](https://github.com/Riptide-Labs/deltav-proto-contracts/packages) as `io.github.riptide-labs:deltav-proto-contracts`.
+It deploys the same files it attached to the release, so the checksums, signature and provenance above cover the Packages download byte for byte.
 The README shows how consumers authenticate.
 Releases up to v0.1.0 predate this and exist only as GitHub Release assets.
 

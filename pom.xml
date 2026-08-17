@@ -43,15 +43,12 @@
         <tag>HEAD</tag>
     </scm>
 
-    <distributionManagement>
-        <repository>
-            <!-- The id must match the server id in the settings.xml that
-                 actions/setup-java generates in CI (its default is 'github'). -->
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/Riptide-Labs/deltav-proto-contracts</url>
-        </repository>
-    </distributionManagement>
+    <!--
+        Deliberately no distributionManagement. Publication goes through
+        'make deploy' (deploy:deploy-file), which pushes the jars that were
+        already checksummed, signed and attested. A plain 'mvn deploy' would
+        rebuild different bytes and must have no repository to land in.
+    -->
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
