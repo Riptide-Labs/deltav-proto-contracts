@@ -1,0 +1,13 @@
+# Copyright (C) 2026 The Delta-V Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+# zizmor's unpinned-uses audit defaults to a ref-pin policy, which accepts a
+# mutable tag like @v1. Requiring a hash pin makes the workflow-lint gate fail
+# on an unpinned action instead of leaving it to review, which is how
+# bufbuild/buf-action@v1 reached main.
+rules:
+  unpinned-uses:
+    ignore: []
+    config:
+      policies:
+        '*': hash-pin
