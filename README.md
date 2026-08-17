@@ -126,6 +126,8 @@ make help       # Display detailed target help
 - [CONTRIBUTING.md](CONTRIBUTING.md) — DCO sign-off, AI-assistance disclosure, and breaking change rules
 - [RELEASING.md](RELEASING.md) — Versioning strategy, release workflow, and signature verification
 - [SECURITY.md](SECURITY.md) — Vulnerability reporting policy
+- [SUPPORT.md](SUPPORT.md) — Where to ask questions and report problems
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — Expected behaviour and how to report a violation
 
 ---
 
