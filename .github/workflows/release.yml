@@ -119,12 +119,23 @@ jobs:
             dist/*.tar.gz
 
       # setup-java already wrote a settings.xml whose server id 'github' matches
-      # the pom's distributionManagement; it reads these two env variables.
+      # the deploy target; it reads these two env variables. Publishing is
+      # skipped when the version already exists: GitHub Packages answers a
+      # re-deploy with 409, which would otherwise brick every re-run of this
+      # job before the draft release is created.
       - name: Publish to GitHub Packages
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: make deploy
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          pom_url="https://maven.pkg.github.com/Riptide-Labs/deltav-proto-contracts/io/github/riptide-labs/deltav-proto-contracts/${VERSION}/deltav-proto-contracts-${VERSION}.pom"
+          status="$(curl -s -o /dev/null -w '%{http_code}' -u "${GITHUB_ACTOR}:${GITHUB_TOKEN}" "${pom_url}")"
+          if [ "${status}" = "200" ]; then
+            echo "version ${VERSION} is already on GitHub Packages, skipping (re-run)"
+          else
+            make deploy
+          fi
 
       # gh is on the runner, so the publishing step needs no third-party action.
       - name: Create the draft release
