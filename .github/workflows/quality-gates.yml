@@ -95,8 +95,8 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
-      actions: read
-      security-events: write
+      actions: read # zizmor-action reads workflow run metadata
+      security-events: write # zizmor-action uploads SARIF to the Security tab
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
