@@ -3,6 +3,7 @@
 [![CI](https://github.com/Riptide-Labs/deltav-proto-contracts/actions/workflows/ci.yml/badge.svg)](https://github.com/Riptide-Labs/deltav-proto-contracts/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/Riptide-Labs/deltav-proto-contracts?sort=semver)](https://github.com/Riptide-Labs/deltav-proto-contracts/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Riptide-Labs/deltav-proto-contracts/badge)](https://scorecard.dev/viewer/?uri=github.com/Riptide-Labs/deltav-proto-contracts)
 
 The canonical **Apache-2.0 licensed Protocol Buffer schemas and gRPC contracts** for Delta-V multi-protocol telemetry, flow records, node contexts, and alarm events.
 
