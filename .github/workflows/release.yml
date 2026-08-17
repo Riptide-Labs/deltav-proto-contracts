@@ -130,12 +130,15 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           pom_url="https://maven.pkg.github.com/Riptide-Labs/deltav-proto-contracts/io/github/riptide-labs/deltav-proto-contracts/${VERSION}/deltav-proto-contracts-${VERSION}.pom"
-          status="$(curl -s -o /dev/null -w '%{http_code}' -u "${GITHUB_ACTOR}:${GITHUB_TOKEN}" "${pom_url}")"
-          if [ "${status}" = "200" ]; then
-            echo "version ${VERSION} is already on GitHub Packages, skipping (re-run)"
-          else
-            make deploy
-          fi
+          # -L matters: an existing version answers 302 to blob storage and only
+          # reaches 200 after the redirect. Anything but a clean 200/404 fails
+          # loudly; a 401 or 5xx must trigger neither a deploy nor a silent skip.
+          status="$(curl -sL -o /dev/null -w '%{http_code}' -u "${GITHUB_ACTOR}:${GITHUB_TOKEN}" "${pom_url}")"
+          case "${status}" in
+            200) echo "version ${VERSION} is already on GitHub Packages, skipping (re-run)" ;;
+            404) make deploy ;;
+            *) echo "unexpected HTTP ${status} probing GitHub Packages for ${VERSION}" >&2; exit 1 ;;
+          esac
 
       # gh is on the runner, so the publishing step needs no third-party action.
       - name: Create the draft release
