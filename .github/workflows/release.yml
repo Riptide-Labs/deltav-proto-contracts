@@ -81,7 +81,7 @@ jobs:
           tar -czf "dist/proto-${VERSION}.tar.gz" proto
 
       - name: Install cargo-cyclonedx
-        uses: taiki-e/install-action@7f4eb899022d8fe70b20c4f3de697aa85c309026 # v2.85.11
+        uses: taiki-e/install-action@b6ff580856c41316412a0b9b60540fbc6f8c82cc # v2.86.7
         with:
           tool: cargo-cyclonedx
 
@@ -91,7 +91,7 @@ jobs:
           mv sbom.cdx.json dist/
 
       - name: Generate SBOM HTML report
-        uses: no42-org/blitsbom@b3cb2b1bdd5664193478acf04812251fdc8eb124 # v0.7.1
+        uses: no42-org/blitsbom@48e615d57bd2a11d808cf52eb9f86bb8e853bee9 # v0.8.0
         with:
           sbom: dist/sbom.cdx.json
           output: dist/deltav-proto-contracts-${{ steps.version.outputs.version }}-sbom.html
