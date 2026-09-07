@@ -107,6 +107,6 @@ jobs:
       # The pedantic persona is what makes the hash-pin policy in .github/zizmor.yml
       # bite: an unpinned action is a low-severity finding, which the default
       # 'regular' persona suppresses. The workflows are clean at this level.
-      - uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
+      - uses: zizmorcore/zizmor-action@70fb788f84895a7701f5643d103d587e460b5c99 # v0.6.3
         with:
           persona: pedantic
